@@ -1,11 +1,14 @@
-#include <iostream>
-#include <vector>
-#include <unordered_map>
 #include <fstream>
 //#include <string>
 #include <sstream>
+#include <windows.h>
+#include <shellapi.h>
+#include <chrono>
 #include "Movie.h"
 using namespace std;
+
+//Citations:
+    //https://stackoverflow.com/questions/17347950/how-do-i-open-a-url-from-c //used for displaying output of the URLs for the specific movies
 
 class MovRateSys {
     /*struct Movie {
@@ -145,23 +148,29 @@ int main()
     MovRateSys help;
     help.readFile();
 
-    int option = 0;
-    cin >> option;
+    while(true){
 
-    //Option 1, search for a specific movie
-        //Output:
-            //Avg Rating
-            //Genres of the Movie
-    //Option 2, search by genre
-        //Type in which genre/ genres are desired
-        //Get highest rated movies or lowest rated movies or output all //Type in "1, 2, or 3 Compare" for comparison between Merge/Quicksort
-            //Output: (only mergesort prints out to the user)
-                //Movie Name Avg Rating (2 decimal)
+        
+        int option = 0;
+        
+        cin >> option;
+        if(option == 1){ //search specific movie
+            //Output:
+                //Avg Rating
+                //Genres of the Movie
+                //Open a link to IMDB for the movie (option yes or no)
+        }
+        else if(option == 2){ //search by genre
+            //Type in which genre/ genres are desired "Action Comedy"
+            //Input lowest rating desired (0-5)
+            //Input highest rating desired (0-5)
+                //Output: (only mergesort prints out to the user)
+                        //Movie Name Avg Rating (2 decimal) 
+        }
 
+        //ShellExecuteW(0, 0, L"http://www.google.com", 0, 0 , SW_SHOW );
+        //ShellExecuteW(0, 0, L"https://www.imdb.com/title/tt0042451/", 0,0,SW_SHOW);
 
-    /*if (option == 1) {
-        help.outMov();
-    }*/
-
-    std::cout << "Hello World!\n";
+        std::cout << "Hello World!\n";
+    }
 }
