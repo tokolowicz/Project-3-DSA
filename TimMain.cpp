@@ -213,7 +213,13 @@ public:
             cout << iter.first << " " << iter.second.getName() << " " << iter.second.getAvgRating() << "\n";
         }
     }
-
+    bool isValidGenre(string genre){
+        if(genre.compare("Compare") == 0)
+            return true;
+        else if(movByGen.find(genre) != movByGen.end())
+            return true;
+        else return false;
+    }
 };
 
 
@@ -242,38 +248,61 @@ int main()
             istringstream iss(line);
             string genre;
             vector<string> gs;
+            bool compare = false;
+            bool validGenres = true;
 
             while(iss >> genre){
-                gs.push_back(genre);
+                if(help.isValidGenre(genre))
+                    gs.push_back(genre);
+                else{
+                    cout << "Invalid genre selected!\n";
+                    validGenres = false;
+                }
             }
 
-            vector<int> sort = help.getMovies(gs); //gives an unsorted vector of possible movie IDs
-            help.mergeSort(sort, 0, sort.size()-1); //do the mergesort (gets low -> high)
+            if(validGenres == true){
+                if(!gs.empty() && gs.at(gs.size()-1).compare("Compare") == 0){ //checks to see if compare is the last value
+                    gs.pop_back(); //pops off the compare value
+                    compare = true; //sets a boolean so we know to compare the two sorting algorithms
+                }
 
-            //Tony put in the other sort here if you want (make a separate vector<int> variable for yours though)
+                vector<int> sort = help.getMovies(gs); //gives an unsorted vector of possible movie IDs
 
-            double low, high = -1.0;
+                auto start = chrono::high_resolution_clock::now(); //start point before the mergesort happens
 
-            while(true){ //takes in lowest rating
-                cout << "Input lowest rating desired (0-5): \n";
-                getline(cin, line);
-                low = stoi(line);
-                if(low <= 5 && low >= 0)
-                    break;
+                help.mergeSort(sort, 0, sort.size()-1); //do the mergesort (gets low -> high)
+                
+                auto stop = chrono::high_resolution_clock::now(); //end point after mergesort
+                auto mergeDur = chrono::duration_cast<chrono::microseconds>(stop - start);
+
+                //Tony put in the other sort here if you want (make a separate vector<int> variable for yours though)
+
+                if(compare == true){ //if we are comparing, print out the times it takes to sort the two methods
+                    cout << "Merge sort took " << mergeDur.count() << " microseconds and Quick sort took " << 0 << " microseconds.\n";
+                }
+
+                double low, high = -1.0;
+
+                while(true){ //takes in lowest rating
+                    cout << "Input lowest rating desired (0-5): \n";
+                    getline(cin, line);
+                    low = stoi(line);
+                    if(low <= 5 && low >= 0)
+                        break;
+                }
+
+                while(true){ //takes in highest rating
+                    cout << "Input highest rating desired (0-5): \n";
+                    getline(cin, line);
+                    high = stoi(line);
+                    if(high <= 5 && high >= 0 && high >= low)
+                        break;
+                }
+                
+                help.displayMerge(sort, low, high);
             }
-
-            while(true){ //takes in highest rating
-                cout << "Input highest rating desired (0-5): \n";
-                getline(cin, line);
-                high = stoi(line);
-                if(high <= 5 && high >= 0 && high >= low)
-                    break;
-            }
-            
-            help.displayMerge(sort, low, high);
         }
         else if(option == 3){ //exits program
-            help.displayTest();
             break;
         }
         else{
