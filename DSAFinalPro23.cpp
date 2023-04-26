@@ -8,7 +8,7 @@
 using namespace std;
 
 //Citations:
-    //https://stackoverflow.com/questions/17347950/how-do-i-open-a-url-from-c //used for displaying output of the URLs for the specific movies
+//https://stackoverflow.com/questions/17347950/how-do-i-open-a-url-from-c //used for displaying output of the URLs for the specific movies
 
 class MovRateSys {
 
@@ -48,6 +48,33 @@ class MovRateSys {
             resultI++;
         }
     }
+    int partition(vector<int>& IDs, int low, int high) {
+        //set pivot to first element, init pointers
+        int pivot = IDs[low];
+        int up = low, down = high;
+
+        while (up < down) {
+            //sorts greatest to least
+            for (int j = up; j < high; j++) {
+                //find first element greater than pivot
+                if (IDtoMovInfo[IDs[up]].getAvgRating() < IDtoMovInfo[pivot].getAvgRating())
+                    break;
+                up++;
+            }
+            for (int j = high; j > low; j--) {
+                //find first element less than pivot
+                if (IDtoMovInfo[IDs[down]].getAvgRating() > IDtoMovInfo[pivot].getAvgRating())
+                    break;
+                down--;
+            }
+            //one pass of sorting
+            if (up < down)
+                swap(IDs[up], IDs[down]);
+        }
+        //move on to next element
+        swap(IDs[low], IDs[down]);
+        return down;
+    }
 
 public:
     void readFile() {
@@ -83,7 +110,7 @@ public:
                     vector<string> v = movie.getGenres();
                     for (unsigned int i = 0; i < v.size(); i++) {         //all about the genre portion
                         if (movByGen.find(v.at(i)) == movByGen.end()) {      //if genre doesnt exist
-                            movByGen.emplace(v.at(i), vector<int>());        //emplace 
+                            movByGen.emplace(v.at(i), vector<int>());        //emplace
                         }
 
                         movByGen.at(v.at(i)).push_back(movie.getID());        //insert movie id into genre
@@ -147,16 +174,6 @@ public:
         }
 
     }
-
-    void outByGenre() {
-        cout << "Input Genre: ";
-
-        string genre;
-        cin >> genre;
-
-        /*more code here*/
-    }
-
     vector<int> getMovies(vector<string> genres) {
         //first we need to get all of the possible movies with the selected genres into the v vector
         vector<int> gms = movByGen[genres[0]]; //holds all of the movies with a specific genre
@@ -200,6 +217,17 @@ public:
             }
         }
     }
+    void quickSort(vector<int>& IDs, int low, int high) {
+        //if there is more than one movie ID
+        if (low < high) {
+            //get pivot index
+            int pivot = partition(IDs, low, high);
+            //recursively sort left subarray
+            quickSort(IDs, low, pivot - 1);
+            //recursively sort right subarray
+            quickSort(IDs, pivot + 1, high);
+        }
+    }
     void displayTest() {
         for (auto iter : IDtoMovInfo) {
             cout << iter.first << " " << iter.second.getName() << " " << iter.second.getAvgRating() << "\n";
@@ -212,7 +240,6 @@ public:
             return true;
         else return false;
     }
-
     void findMovie(vector<string>& links) {
         while (true) {                               //loops until user decides to break
             string input;
@@ -244,7 +271,7 @@ public:
                         }
 
                         cout << "Would you like to open another link? (yes or no)" << endl;
-                        string openAnother;                     
+                        string openAnother;
                         cin >> openAnother;
                         if (openAnother == "yes" || openAnother == "Yes") {
                             continue;
@@ -264,12 +291,13 @@ public:
                 links.clear();                                                              //clears vector for next cycle
             }
             else {
+                links.clear();
                 int counter = 0;                                                            //determines how many movies selected
                 for (auto& i : movToID) {
-                    
+
                     if (i.first.find(input) != string::npos) {                              //if the current title contains a key word
-                        
-                        Movie& movie = IDtoMovInfo[i.second];                              
+
+                        Movie& movie = IDtoMovInfo[i.second];
                         counter++;
                         if (counter == 1) {
                             cout << "TITLES FOUND" << endl;
@@ -318,7 +346,7 @@ int main()
         option = stoi(line);
         if (option == 1) { //search specific movie
             cout << "Enter your movie or go back by pressing enter" << endl;
-            vector<string> links;   
+            vector<string> links;
             help.findMovie(links);
         }
         else if (option == 2) { //search by genre
@@ -348,6 +376,7 @@ int main()
                 }
 
                 vector<int> sort = help.getMovies(gs); //gives an unsorted vector of possible movie IDs
+                vector<int> sort2 = sort;
 
                 auto start = chrono::high_resolution_clock::now(); //start point before the mergesort happens
 
@@ -356,10 +385,16 @@ int main()
                 auto stop = chrono::high_resolution_clock::now(); //end point after mergesort
                 auto mergeDur = chrono::duration_cast<chrono::microseconds>(stop - start);
 
-                //Tony put in the other sort here if you want (make a separate vector<int> variable for yours though)
+                //same process for quicksort
+                auto start2 = chrono::high_resolution_clock::now();
+
+                help.quickSort(sort2, 0, sort2.size() - 1);
+
+                auto stop2 = chrono::high_resolution_clock::now();
+                auto quickDur = chrono::duration_cast<chrono::microseconds>(stop2 - start2);
 
                 if (compare == true) { //if we are comparing, print out the times it takes to sort the two methods
-                    cout << "Merge sort took " << mergeDur.count() << " microseconds and Quick sort took " << 0 << " microseconds.\n";
+                    cout << "Merge sort took " << mergeDur.count() << " microseconds and Quick sort took " << quickDur.count() << " microseconds.\n";
                 }
 
                 double low, high = -1.0;
@@ -392,7 +427,5 @@ int main()
 
         //ShellExecuteW(0, 0, L"http://www.google.com", 0, 0 , SW_SHOW );
         //ShellExecuteW(0, 0, L"https://www.imdb.com/title/tt0042451/", 0,0,SW_SHOW);
-
-        std::cout << "Hello World!\n";
     }
 }
